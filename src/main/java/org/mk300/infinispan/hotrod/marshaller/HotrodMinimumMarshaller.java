@@ -23,8 +23,6 @@ import org.infinispan.commons.io.ByteBufferFactoryImpl;
 import org.infinispan.commons.marshall.BufferSizePredictor;
 import org.infinispan.commons.marshall.Marshaller;
 import org.mk300.marshal.minimum.MinimumMarshaller;
-import org.mk300.marshal.minimum.io.BAInputStream;
-import org.mk300.marshal.minimum.io.OInputStream;
 
 /**
  * 
@@ -49,9 +47,9 @@ public class HotrodMinimumMarshaller implements Marshaller {
 	// 一応、compatibleMode=trueの場合は、PersistenceStoreやjgroupのレイヤーから呼ばれるので実装しているが、その場合、
 	// JDGのクラスも設定ファイルに追加する必要があり、正常に動作させるのが至難の技である。
 	public Object objectFromByteBuffer(byte[] buf, int offset, int length) throws IOException, ClassNotFoundException {
-		BAInputStream bais = new BAInputStream(buf, offset, length);		
-		OInputStream ois = new OInputStream(bais);
-		return ois.readObject();
+		byte[] tmpBuf = new byte[length];
+		System.arraycopy(buf, offset, tmpBuf, 0, length);
+		return MinimumMarshaller.unmarshal(tmpBuf);
 	}
 
 	// Client-Serverモード, compatibleMode=falseでは呼ばれない。
